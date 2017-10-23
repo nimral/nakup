@@ -462,5 +462,7 @@ jidelnicek2 = {
 
 
 if __name__ == "__main__":
-    rs = roztrid_seznam(seznam(jidelnicek, lidi, (so1, snidane), (ne2, vecere)))
+    rs = roztrid_seznam(
+        seznam(jidelnicek, lidi, (so1, snidane), (ne2, vecere))
+    )
     vytiskni_roztrizeny_seznam(rs, "seznam.pdf")

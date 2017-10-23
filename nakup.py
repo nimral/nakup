@@ -1,6 +1,10 @@
 import os
 import re
 import json
+import locale
+
+
+locale.setlocale(locale.LC_ALL, "cs_CZ.UTF-8")
 
 
 class S:
@@ -40,11 +44,14 @@ class S:
         if type(kolik) != int:
             kolik = "{:.2f}".format(kolik)
         return r"{} {} {} {{\color{{gray}}({})}}\\".format(
-            self.co, kolik, self.jednotka, self.poznamka
+            self.co.replace('%', r'\%'), kolik, self.jednotka, self.poznamka
         )
 
     def __repr__(self):
         return self.__str__()
+
+    def __lt__(self, other):
+        return locale.strxfrm(self.co) < locale.strxfrm(other.co)
 
 
 class Jidlo:
@@ -98,7 +105,12 @@ def seznam(jidelnicek, lidi, od, do=None):
 
 
 def roztrid_seznam(seznam):
-    """Roztřídí nákupní seznam na předpokládané oblasti v obchodě"""
+    """Roztřídí nákupní seznam na předpokládané oblasti v obchodě
+
+    Vrací slovník {"oblast": [Suroviny], ...}
+    """
+
+    # uložené roztřízení
     if os.path.isfile("roztrizene.json"):
         with open("roztrizene.json", "r") as fin:
             roztrizene = json.load(fin)
@@ -135,7 +147,7 @@ header = r'''\documentclass[a4paper]{article}
 \usepackage{lmodern} % for searchable pdf
 \usepackage{microtype}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
-\pagestyle{empty} % removes page numbers
+%\pagestyle{empty} % removes page numbers
 
 \begin{document}
 \setlength{\parindent}{0cm}
@@ -147,14 +159,16 @@ footer = r'''
 
 
 def vytiskni_roztrizeny_seznam(oblasti, pdf_filename):
+    """Vytvoří pdf s roztřízeným nákupním seznamem"""
     latex_filename = re.sub(r'pdf$', 'latex', pdf_filename)
     with open(latex_filename, "w") as fout:
         fout.write(header)
 
-        for oblast, polozky in oblasti.items():
+        for oblast, polozky in sorted(
+                oblasti.items(), key=lambda x: locale.strxfrm(x[0])):
             fout.write("\n\n")
             fout.write(r'\textbf{%s}\\' % oblast)
-            for s in polozky:
+            for s in sorted(polozky):
                 fout.write(s.latex())
 
         fout.write(footer)
