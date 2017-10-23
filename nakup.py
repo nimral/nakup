@@ -173,3 +173,7 @@ def vytiskni_roztrizeny_seznam(oblasti, pdf_filename):
 
         fout.write(footer)
     os.system("pdflatex {}".format(latex_filename))
+
+
+def do_ceho_patri(surovina, jidelnicek, lidi, od, do):
+    return seznam(jidelnicek, lidi, od, do)[surovina].poznamka
