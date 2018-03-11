@@ -51,7 +51,7 @@ class S:
         if int(kolik) == kolik:
             kolik = int(kolik)
         if type(kolik) != int:
-            kolik = "{:.2f}".format(kolik)
+            kolik = "{:.3f}".format(kolik).rstrip("0").rstrip(".")
         return r"{} {} {}".format(self.co, kolik, self.jednotka)
 
     def latex(self):
@@ -59,7 +59,7 @@ class S:
         if int(kolik) == kolik:
             kolik = int(kolik)
         if type(kolik) != int:
-            kolik = "{:.2f}".format(kolik)
+            kolik = "{:.3f}".format(kolik).rstrip("0").rstrip(".")
         return r"{} {} {} {{\color{{gray}}({})}}\\".format(
             self.co.replace('%', r'\%'), kolik, self.jednotka, self.poznamka
         )
@@ -150,8 +150,12 @@ def roztrid_seznam(seznam):
             roztrizene[co] = volba
 
         oblasti.setdefault(cislovani_oblasti[roztrizene[co]], []).append(s)
+
     with open("roztrizene.json", "w") as fout:
         json.dump(roztrizene, fout, ensure_ascii=False)
+
+    for oblast in oblasti.values():
+        oblast.sort()
     return oblasti
 
 
