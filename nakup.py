@@ -20,12 +20,29 @@ class S:
             raise Exception(
                 "Nekompatibilní suroviny: {} a {}"
                 .format(self.co, other.co))
-        if self.jednotka != other.jednotka:
-            raise Exception(
-                "Nekompatibilní jednotky: {} a {} ({})"
-                .format(self.jednotka, other.jednotka, self.co))
 
-        novy = S(self.co, self.kolik + other.kolik, self.jednotka)
+        if self.jednotka == other.jednotka:
+            kolik = self.kolik + other.kolik
+            jednotka = self.jednotka
+        else:
+            self, other = sorted([self, other], key=lambda x: x.jednotka)
+            # NOTE use astropy.units?
+            if self.jednotka == "g" and other.jednotka == "kg":
+                kolik = self.kolik + (1000 * other.kolik)
+                jednotka = "g"
+            elif self.jednotka == "dkg" and other.jednotka == "kg":
+                kolik = (self.kolik / 100) + other.kolik
+                jednotka = "kg"
+            elif self.jednotka == "dkg" and other.jednotka == "g":
+                kolik = (self.kolik * 10) + other.kolik
+                jednotka = "kg"
+            else:
+                raise Exception(
+                    "Nekompatibilní jednotky: {} a {} ({})"
+                    .format(self.jednotka, other.jednotka, self.co)
+                )
+
+        novy = S(self.co, kolik, jednotka)
         novy.poznamka = self.poznamka + ", " + other.poznamka
         return novy
 
